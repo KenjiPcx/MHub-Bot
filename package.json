@@ -1,12 +1,12 @@
 {
   "name": "mhub-bot",
   "version": "1.0.0",
-  "type": "module",
+  "type": "commonjs",
   "description": "Discord bot for Malaysian Hub",
   "main": "bot.js",
   "scripts": {
-    "start": "tsc && node src/bot.js",
-    "dev": "tsc && nodemon src/bot.js",
+    "start": "node src/bot.js",
+    "dev": "nodemon src/bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,8 +25,6 @@
     "dotenv": "^10.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
-    "nodemon": "^2.0.12",
-    "typescript": "^4.3.5"
+    "nodemon": "^2.0.12"
   }
 }
