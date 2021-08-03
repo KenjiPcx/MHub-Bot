@@ -21,8 +21,10 @@
   },
   "homepage": "https://github.com/KenjiPcx/MHub-Bot#readme",
   "dependencies": {
-    "discord.js": "^12.5.3",
-    "dotenv": "^10.0.0"
+    "@notionhq/client": "^0.2.3",
+    "discord.js": "^13.0.0-dev.t1627949059.35fa3b3",
+    "dotenv": "^10.0.0",
+    "glob": "^7.1.7"
   },
   "devDependencies": {
     "nodemon": "^2.0.12"
