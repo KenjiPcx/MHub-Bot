@@ -1,6 +1,7 @@
 const { Client, Collection, Intents } = require("discord.js");
 const dotenv = require("dotenv");
 dotenv.config();
+const CONST = require("./constants");
 
 const client = new Client({
   intents: [

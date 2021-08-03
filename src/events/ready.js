@@ -1,3 +1,5 @@
+const CONST = require("../constants");
+
 module.exports = {
   name: "ready",
   once: true,

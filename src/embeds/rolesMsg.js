@@ -1,7 +1,7 @@
 // Use this in on ready to post first time
-// require("./embedRolesMsg").initRolesMsg(client, CONST.ROLES_CHANNEL_ID);
+// require("../embeds/roles").sendMsg(client, CONST.kROLES_CHANNEL_ID);
 
-const initRolesMsg = (client, channelId) => {
+const sendMsg = (client, channelId) => {
   client.channels.cache.get(channelId).send({
     embed: {
       color: 3447003,
@@ -43,5 +43,5 @@ const initRolesMsg = (client, channelId) => {
 };
 
 module.exports = {
-  initRolesMsg,
+  sendMsg,
 };

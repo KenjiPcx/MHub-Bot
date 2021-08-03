@@ -3,7 +3,6 @@ const CONST = require("../constants");
 module.exports = {
   name: "messageReactionRemove",
   execute: async (reaction, user) => {
-    console.log("Removed");
     const { name } = reaction.emoji;
     const member = reaction.message.guild.members.cache.get(user.id);
 
