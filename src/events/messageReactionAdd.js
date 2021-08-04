@@ -1,4 +1,36 @@
 const CONST = require("../constants");
+const {
+  userToPageMap,
+  createDbEntry,
+  updateDbEntry,
+} = require("../notion/notion");
+
+const updatePrefMsg = (username, types, topics) => {
+  let typesMsg = "Event Types\n";
+  if (types.length === 0) {
+    typesMsg += "None";
+  } else {
+    types.map((type, index) => {
+      typesMsg += ` ${index + 1}. ${type}\n`;
+    });
+  }
+
+  let topicsMsg = "Event Topics\n";
+  if (topics.length === 0) {
+    topicsMsg += "None";
+  } else {
+    topics.map((topic, index) => {
+      topicsMsg += `  ${index + 1}. ${topic}\n`;
+    });
+  }
+
+  return `Hi, ${username}.
+  You have updated your event preferences.
+          
+  ${typesMsg}
+  ${topicsMsg}
+  `;
+};
 
 module.exports = {
   name: "messageReactionAdd",
@@ -15,43 +47,62 @@ module.exports = {
     }
 
     // Subscribe Notifications
-    if (member && reaction.message.id === CONST.kINTERESTS1_MSG_ID) {
+    if (
+      reaction.message.id === CONST.kINTERESTS1_MSG_ID ||
+      reaction.message.id === CONST.kINTERESTS2_MSG_ID
+    ) {
       const interest = CONST.kEMOJI_MAP.get(name);
 
-      if (!user.reactions) {
-        user.eventPref = [];
-      }
+      if (interest) {
+        if (!user.typePref) {
+          user.typePref = [];
+        }
 
-      if (interest === "Save") {
-        console.log("Updated Preference")
-        // Send to db
+        if (!user.topicPref) {
+          user.topicPref = [];
+        }
 
-        // if user in db
-        // update
-        
-        // else if !user in db
-        // create
+        if (interest === "Save") {
+          if (!userToPageMap.has(user.id)) {
+            await createDbEntry({
+              userId: user.id,
+              username: user.username,
+              eventTypes: user.typePref,
+              eventTopics: user.topicPref,
+            })
+              .then(() => {
+                console.log(userToPageMap);
+                user.send(
+                  updatePrefMsg(user.username, user.typePref, user.topicPref)
+                );
+              })
+              .catch(console.log);
+          } else {
+            const pageId = userToPageMap.get(user.id).pageId;
+            await updateDbEntry({
+              pageId: pageId,
+              userId: user.id,
+              eventTypes: user.typePref,
+              eventTopics: user.topicPref,
+            })
+              .then(() => {
+                console.log(userToPageMap);
+                user.send(
+                  updatePrefMsg(user.username, user.typePref, user.topicPref)
+                );
+              })
+              .catch(console.log);
+          }
+        } else if (reaction.message.id === CONST.kINTERESTS1_MSG_ID) {
+          user.typePref.push(interest);
+        } else if (reaction.message.id === CONST.kINTERESTS2_MSG_ID) {
+          user.topicPref.push(interest);
+        }
 
-      } else if(interest) {
-        user.eventPref.push(interest);
-        console.log(user.eventPref);
-      }
-    }
-
-    if (member && reaction.message.id === CONST.kINTERESTS2_MSG_ID) {
-      const interest = CONST.kEMOJI_MAP.get(name);
-
-      if (!user.reactions) {
-        user.topicPref = [];
-      }
-
-      if (interest === "Save") {
-        console.log("Updated Preference");
-        // Send to db
-
-      } else if (interest) {
-        user.topicPref.push(interest);
-        console.log(user.topicPref);
+        console.log("\n////////////////////////////////////\n");
+        console.log("Event Types", user.typePref);
+        console.log("Event Topic", user.topicPref);
+        console.log("\n////////////////////////////////////\n");
       }
     }
   },

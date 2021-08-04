@@ -10,5 +10,7 @@ module.exports = {
     if (message.content === "Easter") {
       message.reply("Egg");
     }
+
+
   },
 };

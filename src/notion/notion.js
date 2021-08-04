@@ -1,8 +1,7 @@
 const { Client } = require("@notionhq/client");
 const dotenv = require("dotenv");
-dotenv.config("../.env");
+dotenv.config();
 
-console.log()
 const notion = new Client({
   auth: process.env.NOTION_KEY,
 });
@@ -30,7 +29,13 @@ const getUserId = (userData) => {
   return userData.properties.Id.rich_text[0].plain_text;
 };
 
-const createDbEntry = async () => {
+const objectify = (arr = []) => {
+  return arr.map((item) => {
+    return { name: item };
+  });
+};
+
+const createDbEntry = async ({ userId, username, eventTypes, eventTopics }) => {
   await notion.pages
     .create({
       parent: {
@@ -41,7 +46,7 @@ const createDbEntry = async () => {
           title: [
             {
               text: {
-                content: "",
+                content: username,
               },
             },
           ],
@@ -51,52 +56,49 @@ const createDbEntry = async () => {
             {
               type: "text",
               text: {
-                content: "",
+                content: userId,
               },
             },
           ],
         },
         "Event Type Interest": {
-          multi_select: [{ name: "Mentorship" }],
+          multi_select: objectify(eventTypes),
         },
         "Event Topic Interest": {
-          multi_select: [{ name: "Technology" }],
+          multi_select: objectify(eventTopics),
         },
       },
     })
     .then((res) => {
-      const userId = res.properties.Id.rich_text[0].plain_text;
-      const pageId = res.id;
-      userToPageMap.set(userId, pageId);
+      const page = {
+        pageId: res.id,
+        userId: userId,
+        eventTypes: eventTypes,
+        eventTopics: eventTopics,
+      };
+      userToPageMap.set(userId, page);
     })
     .catch(console.log);
 };
 
-const updateDbEntry = async (pageId) => {
-  await notion.pages.update({
-    page_id: pageId,
-    properties: {
-      Username: {
-        title: [
-          {
-            text: {
-              content: "",
-            },
-          },
-        ],
+const updateDbEntry = async ({ pageId, userId, eventTypes, eventTopics }) => {
+  await notion.pages
+    .update({
+      page_id: pageId,
+      properties: {
+        "Event Type Interest": {
+          multi_select: objectify(eventTypes),
+        },
+        "Event Topic Interest": {
+          multi_select: objectify(eventTopics),
+        },
       },
-      "Event Type Interest": {
-        multi_select: [{ name: "Mentorship" }],
-      },
-      "Event Topic Interest": {
-        multi_select: [
-          { name: "Technology" },
-          { name: "Education" },
-          { name: "Engineering" },
-        ],
-      },
-    },
-  });
+    })
+    .then((res) => {
+      const page = userToPageMap.get(userId);
+      userToPageMap.set(userId, { ...page, eventTypes, eventTopics });
+    })
+    .catch(console.log);
 };
 
 module.exports = {
@@ -106,9 +108,7 @@ module.exports = {
   updateDbEntry,
   getAllPages,
   getUserId,
+  userToPageMap,
 };
 
-createDbEntry().then(() => {
-  console.log(userToPageMap);
-});
-// updateDbEntry(userToPageMap.get(userId));
+
