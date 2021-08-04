@@ -14,11 +14,8 @@ const getDatabase = async () => {
 };
 
 
-
-
 module.exports = {
   notion,
-  getDatabase,
 };
 
 

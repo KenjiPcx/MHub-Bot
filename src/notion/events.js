@@ -1,6 +1,6 @@
 const { notion } = require("./notion");
 
-const databaseId = "f7724f53f9f9444aaafd8d2a7d89b1c6";
+const databaseId = process.env.DATABASE_ID;
 
 const getAllEvents = async () => {
   const response = await notion.databases.query({
@@ -30,6 +30,7 @@ const getAllEvents = async () => {
         eventType: page.properties["Type of Event"].multi_select.map(
           (field) => field.name
         ),
+        sponsored: page.properties.Sponsored.checkbox
       };
     });
 };

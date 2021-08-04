@@ -13,6 +13,8 @@ const client = new Client({
 });
 
 client.slashCommands = new Collection();
+client.userToPageMap = new Collection();
+client.events = [];
 require("./handler").setup(client).catch(console.log);
 
 client.login(process.env.BOT_TOKEN);

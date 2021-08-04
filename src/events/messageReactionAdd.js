@@ -1,9 +1,5 @@
 const CONST = require("../constants");
-const {
-  userToPageMap,
-  createUser,
-  updateUser,
-} = require("../notion/user");
+const { createUser, updateUser } = require("../notion/user");
 
 const updatePrefMsg = (username, types, topics) => {
   let typesMsg = "Event Types\n";
@@ -34,7 +30,7 @@ const updatePrefMsg = (username, types, topics) => {
 
 module.exports = {
   name: "messageReactionAdd",
-  execute: async (reaction, user) => {
+  execute: async (reaction, user, client) => {
     const { name } = reaction.emoji;
     const member = reaction.message.guild.members.cache.get(user.id);
 
@@ -63,30 +59,33 @@ module.exports = {
         }
 
         if (interest === "Save") {
-          if (!userToPageMap.has(user.id)) {
+          if (!client.userToPageMap.has(user.id)) {
             await createUser({
               userId: user.id,
               username: user.username,
               eventTypes: user.typePref,
               eventTopics: user.topicPref,
-            })
+            }, client.userToPageMap)
               .then(() => {
-                console.log(userToPageMap);
+                console.log(client.userToPageMap);
                 user.send(
                   updatePrefMsg(user.username, user.typePref, user.topicPref)
                 );
               })
               .catch(console.log);
           } else {
-            const pageId = userToPageMap.get(user.id).pageId;
-            await updateUser({
-              pageId: pageId,
-              userId: user.id,
-              eventTypes: user.typePref,
-              eventTopics: user.topicPref,
-            })
+            const pageId = client.userToPageMap.get(user.id).pageId;
+            await updateUser(
+              {
+                pageId: pageId,
+                userId: user.id,
+                eventTypes: user.typePref,
+                eventTopics: user.topicPref,
+              },
+              client.userToPageMap
+            )
               .then(() => {
-                console.log(userToPageMap);
+                console.log(client.userToPageMap);
                 user.send(
                   updatePrefMsg(user.username, user.typePref, user.topicPref)
                 );

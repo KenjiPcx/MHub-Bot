@@ -1,17 +1,35 @@
 const { notion } = require("./notion");
 
 const databaseId = process.env.DATABASE_ID;
-const userToPageMap = new Map();
 
 const getAllUsers = async () => {
   const response = await notion.databases.query({
     database_id: databaseId,
   });
 
-  console.log(response.results[0].properties)
+  const userPages = response.results;
+  return userPages.map((page) => {
+    return {
+      pageId: page.id,
+      userId: page.properties.Id.rich_text[0].plain_text,
+      eventTypes: page.properties["Event Type Interest"].multi_select.map(
+        (type) => type.name
+      ),
+      eventTopics: page.properties["Event Topic Interest"].multi_select.map(
+        (topic) => topic.name
+      ),
+    };
+  });
 };
 
-getAllUsers()
+
+const initUsersMap = async () => {
+  const userToPageMap = new Map();
+  await getAllUsers().then((res) =>
+    res.map((user) => userToPageMap.set(user.userId, user))
+  );
+  return userToPageMap;
+};
 
 const objectify = (arr = []) => {
   return arr.map((item) => {
@@ -19,7 +37,10 @@ const objectify = (arr = []) => {
   });
 };
 
-const createUser = async ({ userId, username, eventTypes, eventTopics }) => {
+const createUser = async (
+  { userId, username, eventTypes, eventTopics },
+  userToPageMap
+) => {
   await notion.pages
     .create({
       parent: {
@@ -65,7 +86,10 @@ const createUser = async ({ userId, username, eventTypes, eventTopics }) => {
     .catch(console.log);
 };
 
-const updateUser = async ({ pageId, userId, eventTypes, eventTopics }) => {
+const updateUser = async (
+  { pageId, userId, eventTypes, eventTopics },
+  userToPageMap
+) => {
   await notion.pages
     .update({
       page_id: pageId,
@@ -86,7 +110,7 @@ const updateUser = async ({ pageId, userId, eventTypes, eventTopics }) => {
 };
 
 module.exports = {
-  userToPageMap,
+  initUsersMap,
   createUser,
   updateUser,
 };
