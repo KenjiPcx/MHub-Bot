@@ -1,9 +1,9 @@
 const CONST = require("../constants");
 const {
   userToPageMap,
-  createDbEntry,
-  updateDbEntry,
-} = require("../notion/notion");
+  createUser,
+  updateUser,
+} = require("../notion/user");
 
 const updatePrefMsg = (username, types, topics) => {
   let typesMsg = "Event Types\n";
@@ -64,7 +64,7 @@ module.exports = {
 
         if (interest === "Save") {
           if (!userToPageMap.has(user.id)) {
-            await createDbEntry({
+            await createUser({
               userId: user.id,
               username: user.username,
               eventTypes: user.typePref,
@@ -79,7 +79,7 @@ module.exports = {
               .catch(console.log);
           } else {
             const pageId = userToPageMap.get(user.id).pageId;
-            await updateDbEntry({
+            await updateUser({
               pageId: pageId,
               userId: user.id,
               eventTypes: user.typePref,
