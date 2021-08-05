@@ -86,7 +86,6 @@ const notify = (client) => {
       }
     }
 
-    console.log(doubleFilteredEvents);
     client.users
       .fetch(userId)
       .then((user) => {

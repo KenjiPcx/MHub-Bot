@@ -1,6 +1,6 @@
 const { notion } = require("./notion");
 
-const databaseId = process.env.DATABASE_ID;
+const databaseId = process.env.USERS_DATABASE_ID;
 
 const getAllUsers = async () => {
   const response = await notion.databases.query({

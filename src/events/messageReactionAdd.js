@@ -48,24 +48,24 @@ module.exports = {
       reaction.message.id === CONST.kINTERESTS2_MSG_ID
     ) {
       const interest = CONST.kEMOJI_MAP.get(name);
-
       if (interest) {
         if (!user.typePref) {
           user.typePref = [];
         }
-
         if (!user.topicPref) {
           user.topicPref = [];
         }
-
         if (interest === "Save") {
           if (!client.userToPageMap.has(user.id)) {
-            await createUser({
-              userId: user.id,
-              username: user.username,
-              eventTypes: user.typePref,
-              eventTopics: user.topicPref,
-            }, client.userToPageMap)
+            await createUser(
+              {
+                userId: user.id,
+                username: user.username,
+                eventTypes: user.typePref,
+                eventTopics: user.topicPref,
+              },
+              client.userToPageMap
+            )
               .then(() => {
                 console.log(client.userToPageMap);
                 user.send(
@@ -97,11 +97,6 @@ module.exports = {
         } else if (reaction.message.id === CONST.kINTERESTS2_MSG_ID) {
           user.topicPref.push(interest);
         }
-
-        console.log("\n////////////////////////////////////\n");
-        console.log("Event Types", user.typePref);
-        console.log("Event Topic", user.topicPref);
-        console.log("\n////////////////////////////////////\n");
       }
     }
   },
