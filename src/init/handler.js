@@ -1,10 +1,11 @@
 const glob = require("glob");
 const { promisify } = require("util");
 const globPromise = promisify(glob);
-const CONST = require("./constants");
 
 module.exports = {
-  setup: async (client) => {
+  init: async (client) => {
+    console.log("Initializing Setup");
+    
     // Slash Commands Handler
     const slashCommandFiles = await globPromise(
       `${process.cwd()}/src/slashCommands/**/*.js`

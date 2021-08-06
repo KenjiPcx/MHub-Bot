@@ -1,4 +1,4 @@
-const { createMsg } = require("./embeds/newsletterMsg");
+const { createMsg } = require("../embeds/newsletterMsg");
 
 const filterType = (events, eventTypes) => {
   const filteredArr = [];
@@ -30,36 +30,28 @@ const filterEvents = (events, eventTypes, eventTopics) => {
   return filterTopics(filterType(events, eventTypes), eventTopics);
 };
 
-const notify = (client) => {
+const notify = async (client) => {
   const events = client.events;
   const users = Array.from(client.userToPageMap.values());
-  users.pop();
 
-  users.forEach((userPage, i) => {
+  users.forEach(async (userPage, i) => {
     const { userId, eventTypes, eventTopics } = userPage;
 
-    try {
-      const sponsoredEvents = events.filter((event) => event.sponsored);
-      const normalEvents = events.filter((event) => !event.sponsored);
-      const filteredEvents = filterEvents(normalEvents, eventTypes, eventTopics)
-      const embedMsg = createMsg(sponsoredEvents, filteredEvents);
-  
-      client.users
-        .fetch(userId)
-        .then((user) => {
-          if (user.id !== "871701741865959425") {
-            user.send({
-              embeds: [embedMsg],
-            });
-          }
-        })
-        .catch(console.log);
-      
-      console.log("---Initialized User Notifications");
+    const sponsoredEvents = events.filter((event) => event.sponsored);
+    const normalEvents = events.filter((event) => !event.sponsored);
+    const filteredEvents = filterEvents(normalEvents, eventTypes, eventTopics);
+    const embedMsg = createMsg(sponsoredEvents, filteredEvents);
 
-    } catch (err) {
-      console.log("xxx-Failed to Initialize User Notifications")
-    }
+    await client.users
+      .fetch(userId)
+      .then((user) => {
+        if (user.id !== "871701741865959425") {
+          user.send({
+            embeds: [embedMsg],
+          });
+        }
+      })
+      .catch(console.log);
   });
 };
 

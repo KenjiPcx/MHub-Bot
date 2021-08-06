@@ -1,14 +1,14 @@
 const { notion } = require("./notion");
+const { getEventById } = require("./events");
 
 const databaseId = process.env.USERS_DATABASE_ID;
 
-const getAllUsers = async () => {
+const getAllUsers = async (events) => {
   const response = await notion.databases.query({
     database_id: databaseId,
   });
 
-  const userPages = response.results;
-  return userPages.map((page) => {
+  return response.results.map((page) => {
     return {
       pageId: page.id,
       userId: page.properties.ID.rich_text[0].plain_text,
@@ -18,22 +18,35 @@ const getAllUsers = async () => {
       eventTopics: page.properties["Event Topic Interest"].multi_select.map(
         (topic) => topic.name
       ),
+      savedEvents: page.properties["Saved Events"].relation.map(
+        (event) => event.id
+      ),
     };
   });
 };
 
+const getUserById = (pageId) => {
+  return notion.pages.retrieve({ page_id: pageId });
+};
 
-const initUsersMap = async () => {
-  const userToPageMap = new Map();
-  await getAllUsers().then((res) =>
+const initUsersMap = async (client) => {
+  const userToPageMap = client.userToPageMap;
+  await getAllUsers(client.events).then((res) =>
     res.map((user) => userToPageMap.set(user.userId, user))
   );
   return userToPageMap;
 };
 
-const objectify = (arr = []) => {
+const objectifyName = (arr = []) => {
   return arr.map((item) => {
     return { name: item };
+  });
+};
+
+const objectifyIds = (arr = []) => {
+  console.log(arr);
+  return arr.map((item) => {
+    return { id: item };
   });
 };
 
@@ -67,10 +80,13 @@ const createUser = async (
           ],
         },
         "Event Type Interest": {
-          multi_select: objectify(eventTypes),
+          multi_select: objectifyName(eventTypes),
         },
         "Event Topic Interest": {
-          multi_select: objectify(eventTopics),
+          multi_select: objectifyName(eventTopics),
+        },
+        "Saved Events": {
+          relation: [],
         },
       },
     })
@@ -95,10 +111,10 @@ const updateUser = async (
       page_id: pageId,
       properties: {
         "Event Type Interest": {
-          multi_select: objectify(eventTypes),
+          multi_select: objectifyName(eventTypes),
         },
         "Event Topic Interest": {
-          multi_select: objectify(eventTopics),
+          multi_select: objectifyName(eventTopics),
         },
       },
     })
@@ -109,8 +125,33 @@ const updateUser = async (
     .catch(console.log);
 };
 
+const updateUserSavedEvents = async (
+  { userId, userData, eventPageId },
+  userToPageMap
+) => {
+  const savedEvents = [...userData.savedEvents, eventPageId];
+
+  await notion.pages
+    .update({
+      page_id: userData.pageId,
+      properties: {
+        "Saved Events": {
+          relation: objectifyIds(savedEvents),
+        },
+      },
+    })
+    .then((res) => {
+      console.log("Prev", userToPageMap);
+      userToPageMap.set(userId, { ...userData, savedEvents });
+      console.log("After", userToPageMap);
+    })
+    .catch(console.log);
+};
+
 module.exports = {
   initUsersMap,
   createUser,
   updateUser,
+  updateUserSavedEvents,
+  getUserById,
 };

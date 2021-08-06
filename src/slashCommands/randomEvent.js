@@ -1,3 +1,4 @@
+const { MessageActionRow, MessageButton } = require("discord.js");
 const { createMsg } = require("../embeds/singleEventMsg");
 
 const randomChoice = (arr) => {
@@ -9,11 +10,24 @@ module.exports = {
   name: "random_event",
   description: "Sends you a random event to check out.",
   async execute(interaction) {
-    // const user = interaction.member.user;
-    const event = randomChoice(interaction.client.events);
+    const client = interaction.client;
+    const event = randomChoice(client.events);
     const embedMsg = createMsg(event);
+    const row = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setCustomId(event.pageId)
+        .setLabel("Save Event")
+        .setStyle("PRIMARY")
+    );
+
+    client.saveButtons.set(event.pageId, {
+      pageId: event.pageId,
+      name: event.eventName,
+    });
+
     await interaction.reply({
       embeds: [embedMsg],
+      components: [row],
       ephemeral: true,
     });
   },

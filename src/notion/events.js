@@ -18,6 +18,7 @@ const getAllEvents = async () => {
       )
       .map((page) => {
         return {
+          pageId: page.id,
           eventName: page.properties.Name.title[0].text.content,
           pageURL: page.url,
           orgContact: page.properties["Org Contact"].rich_text[0].plain_text,
@@ -43,6 +44,16 @@ const getAllEvents = async () => {
   }
 };
 
+const getEventPageById = (pageId) => {
+  return notion.pages.retrieve({ page_id: pageId });
+};
+
+const getEventById = (pageId, eventArr) => {
+  const filteredArr = eventArr.filter((event) => event.pageId === pageId);
+  return filteredArr[0].eventName
+};
+
 module.exports = {
   getAllEvents,
+  getEventById,
 };
