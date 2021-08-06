@@ -11,7 +11,7 @@ const getAllUsers = async () => {
   return userPages.map((page) => {
     return {
       pageId: page.id,
-      userId: page.properties.Id.rich_text[0].plain_text,
+      userId: page.properties.ID.rich_text[0].plain_text,
       eventTypes: page.properties["Event Type Interest"].multi_select.map(
         (type) => type.name
       ),

@@ -11,6 +11,7 @@ const getAllEvents = async () => {
     return response.results
       .filter(
         (page) =>
+          page.properties["End of Registration"] &&
           new Date(
             page.properties["End of Registration"].date.start
           ).getTime() > Date.now()
@@ -36,7 +37,9 @@ const getAllEvents = async () => {
         };
       });
   } catch (err) {
-    console.log("Error in events")
+    console.log("Error in events");
+    console.log(err);
+    return [];
   }
 };
 

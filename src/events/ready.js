@@ -26,11 +26,10 @@ module.exports = {
     console.log("---Initialized Events Database");
 
     // Initialize user weekly notifications
-    // notify(client);
-    // setInterval(() => {
-    //   notify(client);
-    // }, 1000 * 60 * 60 * 24 * 7);
-    console.log("---Initialized User Notifications");
+    notify(client);
+    setInterval(() => {
+      notify(client);
+    }, 1000 * 60 * 60 * 24 * 7);
 
     console.log(`Ready! Logged in as ${client.user.tag}`);
   },
