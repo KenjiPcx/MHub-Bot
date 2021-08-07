@@ -13,10 +13,10 @@ module.exports = {
     },
   ],
   async execute(interaction) {
-    const arg = interaction.options.getString("event_name").trim();
+    const eventName = interaction.options.getString("event_name").trim();
     const userId = interaction.user.id;
     const userData = interaction.client.userToPageMap.get(userId);
-    const eventPage = getEventByName(arg, interaction.client.events);
+    const eventPage = getEventByName(eventName, interaction.client.events);
 
     if (!eventPage) {
       await interaction.reply({

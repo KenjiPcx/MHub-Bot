@@ -1,4 +1,4 @@
-const { createMsg } = require("../embeds/newsletterMsg");
+const { createMsg } = require("../embeds/newsletterMsgs/listMsg");
 
 const filterType = (events, eventTypes) => {
   const filteredArr = [];

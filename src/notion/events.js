@@ -20,6 +20,7 @@ const getAllEvents = async () => {
         return {
           pageId: page.id,
           eventName: page.properties.Name.title[0].text.content,
+          caption: page.properties.Caption.rich_text[0].plain_text,
           pageURL: page.url,
           orgContact: page.properties["Org Contact"].rich_text[0].plain_text,
           posterURL: page.properties["Poster of Event"].url,
