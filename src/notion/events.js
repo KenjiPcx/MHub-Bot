@@ -48,12 +48,20 @@ const getEventPageById = (pageId) => {
   return notion.pages.retrieve({ page_id: pageId });
 };
 
+const getEventByName = (name, eventArr) => {
+  const filteredArr = eventArr.filter(
+    (event) => event.eventName.toLowerCase() === name.toLowerCase()
+  );
+  return filteredArr[0];
+};
+
 const getEventById = (pageId, eventArr) => {
   const filteredArr = eventArr.filter((event) => event.pageId === pageId);
-  return filteredArr[0].eventName
+  return filteredArr[0];
 };
 
 module.exports = {
   getAllEvents,
   getEventById,
+  getEventByName,
 };

@@ -1,9 +1,8 @@
 const { notion } = require("./notion");
-const { getEventById } = require("./events");
 
 const databaseId = process.env.USERS_DATABASE_ID;
 
-const getAllUsers = async (events) => {
+const getAllUsers = async () => {
   const response = await notion.databases.query({
     database_id: databaseId,
   });
@@ -30,11 +29,9 @@ const getUserById = (pageId) => {
 };
 
 const initUsersMap = async (client) => {
-  const userToPageMap = client.userToPageMap;
-  await getAllUsers(client.events).then((res) =>
-    res.map((user) => userToPageMap.set(user.userId, user))
+  await getAllUsers().then((res) =>
+    res.map((user) => client.userToPageMap.set(user.userId, user))
   );
-  return userToPageMap;
 };
 
 const objectifyName = (arr = []) => {
@@ -44,16 +41,12 @@ const objectifyName = (arr = []) => {
 };
 
 const objectifyIds = (arr = []) => {
-  console.log(arr);
   return arr.map((item) => {
     return { id: item };
   });
 };
 
-const createUser = async (
-  { userId, username, eventTypes, eventTopics },
-  userToPageMap
-) => {
+const createUser = async ({ userId, username, eventTypes, eventTopics }) => {
   await notion.pages
     .create({
       parent: {
@@ -90,15 +83,6 @@ const createUser = async (
         },
       },
     })
-    .then((res) => {
-      const page = {
-        pageId: res.id,
-        userId: userId,
-        eventTypes: eventTypes,
-        eventTopics: eventTopics,
-      };
-      userToPageMap.set(userId, page);
-    })
     .catch(console.log);
 };
 
@@ -125,25 +109,15 @@ const updateUser = async (
     .catch(console.log);
 };
 
-const updateUserSavedEvents = async (
-  { userId, userData, eventPageId },
-  userToPageMap
-) => {
-  const savedEvents = [...userData.savedEvents, eventPageId];
-
+const updateUserSavedEvents = async ({ userPageId, savedEvents }) => {
   await notion.pages
     .update({
-      page_id: userData.pageId,
+      page_id: userPageId,
       properties: {
         "Saved Events": {
           relation: objectifyIds(savedEvents),
         },
       },
-    })
-    .then((res) => {
-      console.log("Prev", userToPageMap);
-      userToPageMap.set(userId, { ...userData, savedEvents });
-      console.log("After", userToPageMap);
     })
     .catch(console.log);
 };

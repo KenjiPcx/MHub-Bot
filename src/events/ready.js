@@ -34,7 +34,7 @@ module.exports = {
       });
 
     // Initialize users database
-    client.userToPageMap = await initUsersMap(client)
+    await initUsersMap(client)
       .then((res) => {
         console.log("---Initialized Users Database");
         return res;

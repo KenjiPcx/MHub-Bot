@@ -5,7 +5,7 @@ const globPromise = promisify(glob);
 module.exports = {
   init: async (client) => {
     console.log("Initializing Setup");
-    
+
     // Slash Commands Handler
     const slashCommandFiles = await globPromise(
       `${process.cwd()}/src/slashCommands/**/*.js`
@@ -13,12 +13,23 @@ module.exports = {
     slashCommandFiles.map((file) => {
       const command = require(file);
       if (!command.name) return;
-      const commandData = {
-        name: command.name,
-        description: command.description,
-      };
       client.slashCommands.set(command.name, command);
-      client.slashCommandsData.push(commandData);
+      
+      if (!command.options) {
+        const commandData = {
+          name: command.name,
+          description: command.description,
+        };
+        client.slashCommandsData.push(commandData);
+      } else {
+        const commandData = {
+          name: command.name,
+          description: command.description,
+          options: command.options
+        };
+        client.slashCommandsData.push(commandData);
+      }
+      
     });
     console.log("---Setup Slash Command Handler Done");
 

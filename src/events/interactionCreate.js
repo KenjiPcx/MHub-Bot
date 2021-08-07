@@ -29,22 +29,25 @@ module.exports = {
       const userId = interaction.user.id;
       const userData = client.userToPageMap.get(userId);
       const eventPageId = client.saveButtons.get(interaction.customId).pageId;
-
+      
       if (!userData.savedEvents.includes(eventPageId)) {
-        await updateUserSavedEvents(
-          { userId, userData, eventPageId },
-          client.userToPageMap
-        ).then(() => {
-          interaction.reply({
-            content: "Event added into saved list.",
-            ephemeral: true,
+        const userPageId = userData.pageId;
+        const savedEvents = [...userData.savedEvents, eventPageId];
+
+        await updateUserSavedEvents({ userPageId, savedEvents })
+          .then(async () => {
+            client.userToPageMap.set(userId, { ...userData, savedEvents });
+            await interaction.reply({
+              content: "Event added into saved list.",
+              ephemeral: true,
+            });
+          })
+          .catch(async (err) => {
+            await interaction.reply({
+              content: "Something went wrong with the command.",
+              ephemeral: true,
+            });
           });
-        }).catch((err) => {
-          interaction.reply({
-            content: "Something went wrong with the command.",
-            ephemeral: true,
-          });
-        })
       } else {
         interaction.reply({
           content: "Event is already in saved list.",

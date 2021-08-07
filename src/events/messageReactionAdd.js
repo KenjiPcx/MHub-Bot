@@ -1,6 +1,7 @@
 const CONST = require("../constants");
 const { createUser, updateUser } = require("../notion/user");
 
+// TODO move to embeds
 const updatePrefMsg = (username, types, topics) => {
   let typesMsg = "Event Types\n";
   if (types.length === 0) {
@@ -28,6 +29,83 @@ const updatePrefMsg = (username, types, topics) => {
   `;
 };
 
+const handleRolesAssignment = async (member, name) => {
+  const role = CONST.kEMOJI_MAP.get(name);
+  if (role) {
+    await member.roles.add(role).catch(console.log);
+  }
+};
+
+const initPrefArr = (user) => {
+  if (!user.typePref) {
+    user.typePref = [];
+  }
+  if (!user.topicPref) {
+    user.topicPref = [];
+  }
+};
+
+const handleCreateUser = async (user, client) => {
+  await createUser({
+    userId: user.id,
+    username: user.username,
+    eventTypes: user.typePref,
+    eventTopics: user.topicPref,
+  })
+    .then(async (res) => {
+      const page = {
+        pageId: res.id,
+        userId: userId,
+        eventTypes: eventTypes,
+        eventTopics: eventTopics,
+      };
+      client.userToPageMap.set(userId, page);
+      await user.send(
+        updatePrefMsg(user.username, user.typePref, user.topicPref)
+      );
+    })
+    .catch(console.log);
+};
+
+const handleUpdateUser = async (user, client) => {
+  const pageId = client.userToPageMap.get(user.id).pageId;
+  await updateUser({
+    pageId: pageId,
+    userId: user.id,
+    eventTypes: user.typePref,
+    eventTopics: user.topicPref,
+  })
+    .then(async () => {
+      const page = client.userToPageMap.get(userId);
+      client.userToPageMap.set(userId, {
+        ...page,
+        eventTypes,
+        eventTopics,
+      });
+      await user.send(
+        updatePrefMsg(user.username, user.typePref, user.topicPref)
+      );
+    })
+    .catch(console.log);
+};
+
+const handleUserPref = async (user, interest, client) => {
+  if (interest) {
+    initPrefArr(user);
+    if (reaction.message.id === CONST.kINTERESTS1_MSG_ID) {
+      user.typePref.push(interest);
+    } else if (reaction.message.id === CONST.kINTERESTS2_MSG_ID) {
+      user.topicPref.push(interest);
+    } else if (interest === "Save") {
+      if (!client.userToPageMap.has(user.id)) {
+        await handleCreateUser(user, client).catch(console.log);
+      } else {
+        await handleUpdateUser(user, client).catch(console.log);
+      }
+    }
+  }
+};
+
 module.exports = {
   name: "messageReactionAdd",
   execute: async (reaction, user, client) => {
@@ -36,10 +114,7 @@ module.exports = {
 
     // Assign Roles
     if (member && reaction.message.id === CONST.kROLES_MSG_ID) {
-      const role = CONST.kEMOJI_MAP.get(name);
-      if (role) {
-        await member.roles.add(role).catch(console.log);
-      }
+      handleRolesAssignment(member, name);
     }
 
     // Subscribe Notifications
@@ -48,56 +123,7 @@ module.exports = {
       reaction.message.id === CONST.kINTERESTS2_MSG_ID
     ) {
       const interest = CONST.kEMOJI_MAP.get(name);
-      if (interest) {
-        if (!user.typePref) {
-          user.typePref = [];
-        }
-        if (!user.topicPref) {
-          user.topicPref = [];
-        }
-        if (interest === "Save") {
-          if (!client.userToPageMap.has(user.id)) {
-            await createUser(
-              {
-                userId: user.id,
-                username: user.username,
-                eventTypes: user.typePref,
-                eventTopics: user.topicPref,
-              },
-              client.userToPageMap
-            )
-              .then(() => {
-                console.log(client.userToPageMap);
-                user.send(
-                  updatePrefMsg(user.username, user.typePref, user.topicPref)
-                );
-              })
-              .catch(console.log);
-          } else {
-            const pageId = client.userToPageMap.get(user.id).pageId;
-            await updateUser(
-              {
-                pageId: pageId,
-                userId: user.id,
-                eventTypes: user.typePref,
-                eventTopics: user.topicPref,
-              },
-              client.userToPageMap
-            )
-              .then(() => {
-                console.log(client.userToPageMap);
-                user.send(
-                  updatePrefMsg(user.username, user.typePref, user.topicPref)
-                );
-              })
-              .catch(console.log);
-          }
-        } else if (reaction.message.id === CONST.kINTERESTS1_MSG_ID) {
-          user.typePref.push(interest);
-        } else if (reaction.message.id === CONST.kINTERESTS2_MSG_ID) {
-          user.topicPref.push(interest);
-        }
-      }
+      handleUserPref(user, interest, client);
     }
   },
 };
