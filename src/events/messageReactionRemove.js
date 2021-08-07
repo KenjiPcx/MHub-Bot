@@ -29,11 +29,6 @@ module.exports = {
           user.topicPref = user.topicPref.filter((topic) => topic !== interest);
         }
       }
-
-      console.log("\n////////////////////////////////////\n");
-      console.log("Event Types", user.typePref)
-      console.log("Event Topic", user.topicPref)
-      console.log("\n////////////////////////////////////\n");
     }
   },
 };

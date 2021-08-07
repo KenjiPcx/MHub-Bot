@@ -47,7 +47,7 @@ const objectifyIds = (arr = []) => {
 };
 
 const createUser = async ({ userId, username, eventTypes, eventTopics }) => {
-  await notion.pages
+  return notion.pages
     .create({
       parent: {
         database_id: databaseId,
@@ -62,7 +62,7 @@ const createUser = async ({ userId, username, eventTypes, eventTopics }) => {
             },
           ],
         },
-        Id: {
+        ID: {
           rich_text: [
             {
               type: "text",
@@ -86,10 +86,7 @@ const createUser = async ({ userId, username, eventTypes, eventTopics }) => {
     .catch(console.log);
 };
 
-const updateUser = async (
-  { pageId, userId, eventTypes, eventTopics },
-  userToPageMap
-) => {
+const updateUser = async ({ pageId, eventTypes, eventTopics }) => {
   await notion.pages
     .update({
       page_id: pageId,
@@ -101,10 +98,6 @@ const updateUser = async (
           multi_select: objectifyName(eventTopics),
         },
       },
-    })
-    .then((res) => {
-      const page = userToPageMap.get(userId);
-      userToPageMap.set(userId, { ...page, eventTypes, eventTopics });
     })
     .catch(console.log);
 };
@@ -119,7 +112,6 @@ const updateUserSavedEvents = async ({ userPageId, savedEvents }) => {
         },
       },
     })
-    .catch(console.log);
 };
 
 module.exports = {
