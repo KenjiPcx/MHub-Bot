@@ -5,18 +5,26 @@ const databaseId = process.env.EVENTS_DATABASE_ID;
 const getAllEvents = async () => {
   const response = await notion.databases.query({
     database_id: databaseId,
+    filter: {
+      or: [
+        {
+          property: "End of Registration",
+          date: {
+            next_month: {},
+          },
+        },
+      ],
+    },
+    sorts: [
+      {
+        property: "End of Registration",
+        direction: "ascending",
+      },
+    ],
   });
 
   try {
-    return response.results
-      .filter(
-        (page) =>
-          page.properties["End of Registration"] &&
-          new Date(
-            page.properties["End of Registration"].date.start
-          ).getTime() > Date.now()
-      )
-      .map((page) => {
+    return response.results.map((page) => {
         return {
           pageId: page.id,
           eventName: page.properties.Name.title[0].text.content,
