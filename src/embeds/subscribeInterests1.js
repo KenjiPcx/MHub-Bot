@@ -32,6 +32,7 @@ const sendMsg = (client, channelId) => {
             :knife: - Mentorship
             :carpentry_saw: - Startup Initiatives
             :firecracker: - Career Panels
+            :white_check_mark: - Save
             `,
             },
           ],

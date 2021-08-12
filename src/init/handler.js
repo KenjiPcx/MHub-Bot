@@ -14,7 +14,7 @@ module.exports = {
       const command = require(file);
       if (!command.name) return;
       client.slashCommands.set(command.name, command);
-      
+
       if (!command.options) {
         const commandData = {
           name: command.name,
@@ -25,13 +25,12 @@ module.exports = {
         const commandData = {
           name: command.name,
           description: command.description,
-          options: command.options
+          options: command.options,
         };
         client.slashCommandsData.push(commandData);
       }
-      
     });
-    console.log("---Setup Slash Command Handler Done");
+    console.log("-Slash Command Handler Setup Done");
 
     // Event Handler
     const eventFiles = await globPromise(`${process.cwd()}/src/events/**/*.js`);
@@ -43,6 +42,6 @@ module.exports = {
         client.on(event.name, (...args) => event.execute(...args, client));
       }
     });
-    console.log("---Setup Event Handler Done");
+    console.log("-Event Handler Setup Done");
   },
 };

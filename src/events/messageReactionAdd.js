@@ -1,5 +1,13 @@
 const CONST = require("../constants");
-const { createUser, updateUser } = require("../notion/user");
+const {
+  createUser: createNotionUser,
+  updateUser: updateNotionUser,
+} = require("../notion/user");
+const {
+  createUser,
+  updateUserPreferences,
+  getUserByUserId,
+} = require("../mongo/controller");
 const { createMsg } = require("../embeds/prefMsg");
 
 const handleRolesAssignment = async (member, name) => {
@@ -19,39 +27,38 @@ const initPrefArr = (user) => {
 };
 
 const handleCreateUser = async (user, client) => {
-  await createUser({
+  await createNotionUser({
     userId: user.id,
     username: user.username,
     eventTypes: user.typePref,
     eventTopics: user.topicPref,
   })
     .then(async (res) => {
-      const page = {
-        pageId: res.id,
+      const userData = {
         userId: user.id,
+        pageId: res.id,
+        username: user.username,
         eventTypes: user.typePref,
         eventTopics: user.topicPref,
       };
-      client.userToPageMap.set(user.id, page);
+      createUser(userData);
     })
     .catch(console.log);
 };
 
 const handleUpdateUser = async (user, client) => {
-  const pageId = client.userToPageMap.get(user.id).pageId;
-  await updateUser({
+  const userData = await getUserByUserId(user.id);
+  const pageId = userData.pageId;
+  await updateNotionUser({
     pageId: pageId,
     eventTypes: user.typePref,
     eventTopics: user.topicPref,
   })
     .then(async () => {
-      const page = client.userToPageMap.get(user.id);
-      const eventTypes = user.typePref;
-      const eventTopics = user.topicPref;
-      client.userToPageMap.set(user.id, {
-        ...page,
-        eventTypes,
-        eventTopics,
+      await updateUserPreferences({
+        userId: user.id,
+        eventTypes: user.typePref,
+        eventTopics: user.topicPref,
       });
     })
     .catch(console.log);
@@ -61,7 +68,8 @@ const handleUserPref = async (reaction, user, interest, client) => {
   if (interest) {
     initPrefArr(user);
     if (interest === "Save") {
-      if (!client.userToPageMap.has(user.id)) {
+      const userData = await getUserByUserId(user.id);
+      if (!userData) {
         await handleCreateUser(user, client).catch(console.log);
       } else {
         await handleUpdateUser(user, client).catch(console.log);

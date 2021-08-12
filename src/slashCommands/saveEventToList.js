@@ -1,5 +1,11 @@
 const { getEventByName } = require("../notion/events");
-const { updateUserSavedEvents } = require("../notion/user");
+const {
+  updateUserSavedEvents: updateNotionUserSavedEvents,
+} = require("../notion/user");
+const {
+  getUserByUserId,
+  updateUserSavedEvents,
+} = require("../mongo/controller");
 
 module.exports = {
   name: "save_event_to_list",
@@ -16,7 +22,8 @@ module.exports = {
     const eventName = interaction.options.getString("event_name").trim();
     const eventPage = getEventByName(eventName, interaction.client.events);
     const userId = interaction.user.id;
-    const userData = interaction.client.userToPageMap.get(userId);
+    // const userData = interaction.client.userToPageMap.get(userId);
+    const userData = await getUserByUserId(userId);
 
     if (!eventPage) {
       await interaction.reply({
@@ -32,12 +39,13 @@ module.exports = {
       const userPageId = userData.pageId;
       const savedEvents = [...userData.savedEvents, eventPageId];
 
-      await updateUserSavedEvents({ userPageId, savedEvents })
-        .then(async (res) => {
-          interaction.client.userToPageMap.set(userId, {
-            ...userData,
-            savedEvents,
-          });
+      await updateNotionUserSavedEvents({ userPageId, savedEvents })
+        .then(async () => {
+          // interaction.client.userToPageMap.set(userId, {
+          //   ...userData,
+          //   savedEvents,
+          // });
+          await updateUserSavedEvents({ userId, savedEvents })
           await interaction.reply({
             content: "Event added to list successfully",
             ephemeral: true,

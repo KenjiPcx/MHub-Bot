@@ -1,4 +1,5 @@
 const { Client, Collection, Intents } = require("discord.js");
+const mongoose = require("mongoose");
 const handler = require("./init/handler");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -12,10 +13,23 @@ const client = new Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
 
+// External Data Storage
+mongoose
+  .connect(process.env.MONGODB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  })
+  .then(() => {
+    console.log("-Connected to Mongo");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
 // Internal Data Storage
 client.slashCommands = new Collection();
 client.slashCommandsData = [];
-client.userToPageMap = new Collection();
 client.events = [];
 client.saveButtons = new Collection();
 

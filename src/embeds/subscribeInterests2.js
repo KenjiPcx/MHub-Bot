@@ -33,6 +33,7 @@ const sendMsg = (client, channelId) => {
                 :fortune_cookie: - Law
                 :oden: - Data Science
                 :dango: - Personal Branding like Resume Workshops
+                :white_check_mark: - Save
             `,
             },
           ],
