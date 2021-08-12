@@ -59,4 +59,5 @@ const notify = async (client) => {
 
 module.exports = {
   notify,
+  filterEvents,
 };

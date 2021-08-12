@@ -1,21 +1,29 @@
 const createMsg = (sponsoredEvents, normalEvents) => {
   let sEvents = "";
-  sponsoredEvents.forEach((event, index) => {
-    if (index < 10) {
-      sEvents += `${index + 1} - [${event.eventName}](${
-        event.registrationLink
-      })\n`;
-    }
-  });
+  if (sponsoredEvents.length === 0) {
+    sEvents = "No Events Currently";
+  } else {
+    sponsoredEvents.forEach((event, index) => {
+      if (index < 10) {
+        sEvents += `${index + 1} - [${event.eventName}](${
+          event.registrationLink
+        })\n`;
+      }
+    });
+  }
 
   let nEvents = "";
-  normalEvents.forEach((event, index) => {
-    if (index < 10) {
-      nEvents += `${index + 1} - [${event.eventName}](${
-        event.registrationLink
-      })\n`;
-    }
-  });
+  if (normalEvents.length === 0) {
+    nEvents = "No Events Found In Your Interest...";
+  } else {
+    normalEvents.forEach((event, index) => {
+      if (index < 10) {
+        nEvents += `${index + 1} - [${event.eventName}](${
+          event.registrationLink
+        })\n`;
+      }
+    });
+  }
 
   const embed = {
     color: 0x0099ff,

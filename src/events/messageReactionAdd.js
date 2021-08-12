@@ -9,6 +9,7 @@ const {
   getUserByUserId,
 } = require("../mongo/controller");
 const { createMsg } = require("../embeds/prefMsg");
+const { notifyUserByUserId } = require("../init/notifyUserByUserId");
 
 const handleRolesAssignment = async (member, name) => {
   const role = CONST.kEMOJI_MAP.get(name);
@@ -41,7 +42,7 @@ const handleCreateUser = async (user, client) => {
         eventTypes: user.typePref,
         eventTopics: user.topicPref,
       };
-      createUser(userData);
+      await createUser(userData);
     })
     .catch(console.log);
 };
@@ -79,6 +80,9 @@ const handleUserPref = async (reaction, user, interest, client) => {
       await user.send({
         embeds: [embedMsg],
       });
+      if (!userData) {
+        await notifyUserByUserId(user.id, client);
+      }
     } else if (reaction.message.id === CONST.kINTERESTS1_MSG_ID) {
       user.typePref.push(interest);
     } else if (reaction.message.id === CONST.kINTERESTS2_MSG_ID) {
