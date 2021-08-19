@@ -13,19 +13,21 @@ const client = new Client({
   partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });
 
+
 // External Data Storage
-mongoose
-  .connect(process.env.MONGODB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  })
-  .then(() => {
-    console.log("-Connected to Mongo");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+// mongoose
+//   .connect(process.env.MONGODB_URL, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     useFindAndModify: false,
+//   })
+//   .then(() => {
+//     console.log("-Connected to Mongo");
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
+
 
 // Internal Data Storage
 client.slashCommands = new Collection();
@@ -33,7 +35,9 @@ client.slashCommandsData = [];
 client.events = [];
 client.saveButtons = new Collection();
 
+
 // Bot Setup
 handler.init(client).catch(console.log);
+
 
 client.login(process.env.BOT_TOKEN);

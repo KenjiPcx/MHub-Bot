@@ -6,6 +6,7 @@ const {
   getUserByUserId,
   updateUserSavedEvents,
 } = require("../mongo/controller");
+const db = require("../replDb.js")
 
 module.exports = {
   name: "remove_event_from_list",
@@ -22,7 +23,8 @@ module.exports = {
     const eventName = interaction.options.getString("event_name").trim();
     const userId = interaction.user.id;
     // const userData = interaction.client.userToPageMap.get(userId);
-    const userData = await getUserByUserId(userId);
+    // const userData = await getUserByUserId(userId);
+    const userData = await db.get(userId);
     const eventPage = getEventByName(eventName, interaction.client.events);
 
     if (!eventPage) {
@@ -47,7 +49,12 @@ module.exports = {
           //   ...userData,
           //   savedEvents,
           // });
-          await updateUserSavedEvents({ userId, savedEvents })
+          // await updateUserSavedEvents({ userId, savedEvents })
+          const updatedUserData = {
+            ...userData,
+            savedEvents: savedEvents
+          }
+          await db.set(userId, updatedUserData);
           await interaction.reply({
             content: "Event removed from list successfully",
             ephemeral: true,

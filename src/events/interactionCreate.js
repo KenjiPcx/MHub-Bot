@@ -1,10 +1,11 @@
 const {
   updateUserSavedEvents: updateNotionUserSavedEvents,
 } = require("../notion/user");
-const {
-  getUserByUserId,
-  updateUserSavedEvents,
-} = require("../mongo/controller");
+// const {
+//   getUserByUserId,
+//   updateUserSavedEvents,
+// } = require("../mongo/controller");
+const db = require("../replDb.js");
 
 module.exports = {
   name: "interactionCreate",
@@ -34,7 +35,8 @@ module.exports = {
     ) {
       const userId = interaction.user.id;
       // const userData = client.userToPageMap.get(userId);
-      const userData = await getUserByUserId(userId);
+      // const userData = await getUserByUserId(userId);
+      const userData = await db.get(userId).catch(console.log);
       const eventPageId = client.saveButtons.get(interaction.customId).pageId;
 
       if (!userData.savedEvents.includes(eventPageId)) {
@@ -44,7 +46,12 @@ module.exports = {
         await updateNotionUserSavedEvents({ userPageId, savedEvents })
           .then(async () => {
             // client.userToPageMap.set(userId, { ...userData, savedEvents });
-            await updateUserSavedEvents({ userId, savedEvents });
+            // await updateUserSavedEvents({ userId, savedEvents });
+            const updatedUserData = {
+              ...userData,
+              savedEvents: savedEvents
+            };
+            await db.set(userId, updatedUserData);
             await interaction.reply({
               content: "Event added into saved list.",
               ephemeral: true,

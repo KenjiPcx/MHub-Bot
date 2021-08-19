@@ -1,3 +1,5 @@
+
+const mySecret = process.env['BOT_TOKEN']
 # Logs
 logs
 *.log

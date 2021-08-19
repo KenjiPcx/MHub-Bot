@@ -1,13 +1,14 @@
 const CONST = require("../constants");
+const db = require("../replDb.js");
 const {
   createUser: createNotionUser,
   updateUser: updateNotionUser,
 } = require("../notion/user");
-const {
-  createUser,
-  updateUserPreferences,
-  getUserByUserId,
-} = require("../mongo/controller");
+// const {
+//   createUser,
+//   updateUserPreferences,
+//   getUserByUserId,
+// } = require("../mongo/controller");
 const { createMsg } = require("../embeds/prefMsg");
 const { notifyUserByUserId } = require("../init/notifyUserByUserId");
 
@@ -41,14 +42,17 @@ const handleCreateUser = async (user, client) => {
         username: user.username,
         eventTypes: user.typePref,
         eventTopics: user.topicPref,
+        savedEvents: []
       };
-      await createUser(userData);
+      await db.set(user.id, userData);
+      // await createUser(userData);
     })
     .catch(console.log);
 };
 
 const handleUpdateUser = async (user, client) => {
-  const userData = await getUserByUserId(user.id);
+  // const userData = await getUserByUserId(user.id);
+  const userData = await db.get(user.id).catch(console.log);
   const pageId = userData.pageId;
   await updateNotionUser({
     pageId: pageId,
@@ -56,11 +60,17 @@ const handleUpdateUser = async (user, client) => {
     eventTopics: user.topicPref,
   })
     .then(async () => {
-      await updateUserPreferences({
-        userId: user.id,
+      const updatedUserData = {
+        ...userData,
         eventTypes: user.typePref,
         eventTopics: user.topicPref,
-      });
+      }
+      await db.set(user.id, updatedUserData)
+      // await updateUserPreferences({
+      //   userId: user.id,
+      //   eventTypes: user.typePref,
+      //   eventTopics: user.topicPref,
+      // });
     })
     .catch(console.log);
 };
@@ -69,7 +79,8 @@ const handleUserPref = async (reaction, user, interest, client) => {
   if (interest) {
     initPrefArr(user);
     if (interest === "Save") {
-      const userData = await getUserByUserId(user.id);
+      // const userData = await getUserByUserId(user.id);
+      const userData = await db.get(user.id).catch(console.log);
       if (!userData) {
         await handleCreateUser(user, client).catch(console.log);
       } else {

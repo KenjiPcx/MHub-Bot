@@ -5,6 +5,7 @@ const {
   getUserByUserId,
   updateUserSavedEvents,
 } = require("../mongo/controller");
+const db = require("../replDb.js")
 
 module.exports = {
   name: "clear_events_list",
@@ -12,7 +13,8 @@ module.exports = {
   async execute(interaction) {
     const userId = interaction.user.id;
     // const userData = interaction.client.userToPageMap.get(userId);
-    const userData = await getUserByUserId(userId);
+    // const userData = await getUserByUserId(userId);
+    const userData = await db.get(userId).catch(console.log);
     const userPageId = userData.pageId;
     const savedEvents = [];
 
@@ -22,7 +24,9 @@ module.exports = {
         //   ...userData,
         //   savedEvents,
         // });
-        await updateUserSavedEvents({ userId, savedEvents });
+        // await updateUserSavedEvents({ userId, savedEvents });
+        const updatedUserData = {...userData, savedEvents: savedEvents};
+        await db.set(userId, updatedUserData).catch(console.log);
         await interaction.reply({
           content: "Cleared events list successfully",
           ephemeral: true,
